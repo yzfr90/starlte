@@ -10,12 +10,11 @@
 #
 # Copyright (C) 1995-2001 by Russell King
 
-LDFLAGS :=
 LDFLAGS_vmlinux	:=--no-undefined -X
 CPPFLAGS_vmlinux.lds = -DTEXT_OFFSET=$(TEXT_OFFSET)
 GZFLAGS		:=-9
 
-ifeq ($(CONFIG_RELOCATABLE), y)
+ifeq ($(CONFIG_RELOCATABLE),y)
 # Pass --no-apply-dynamic-relocs to restore pre-binutils-2.27 behaviour
 # for relative relocs, since this leads to better Image compression
 # with the relocation offsets always being zero.
@@ -29,7 +28,16 @@ ifeq ($(CONFIG_ARM64_ERRATUM_843419),y)
   ifeq ($(call ld-option, --fix-cortex-a53-843419),)
 $(warning ld does not support --fix-cortex-a53-843419; kernel may be susceptible to erratum)
   else
+    ifeq ($(call gold-ifversion, -lt, 114000000,y),y)
+$(warning This version of GNU gold may generate incorrect code with --fix-cortex-a53-843419;\
+	see https://sourceware.org/bugzilla/show_bug.cgi?id=21491)
+    endif
 LDFLAGS_vmlinux	+= --fix-cortex-a53-843419
+  endif
+else
+  ifeq ($(ld-name),gold)
+# Pass --no-fix-cortex-a53-843419 to ensure the erratum fix is disabled
+LDFLAGS	+= --no-fix-cortex-a53-843419
   endif
 endif
 
@@ -38,7 +46,7 @@ KBUILD_DEFCONFIG := defconfig
 # Check for binutils support for specific extensions
 lseinstr := $(call as-instr,.arch_extension lse,-DCONFIG_AS_LSE=1)
 
-ifeq ($(CONFIG_ARM64_LSE_ATOMICS), y)
+ifeq ($(CONFIG_ARM64_LSE_ATOMICS),y)
   ifeq ($(lseinstr),)
 $(warning LSE atomics not supported by binutils)
   endif
@@ -50,12 +58,11 @@ KBUILD_CFLAGS	+= $(call cc-option, -mpc-relative-literal-loads)
 KBUILD_CFLAGS	+= -fno-pic
 KBUILD_AFLAGS	+= $(lseinstr)
 KBUILD_CFLAGS	+= $(call cc-option, -march=armv8-a+crypto+crc,)
-ifeq ($(CONFIG_SOC_EXYNOS9810), y)
-KBUILD_CFLAGS	+= $(call cc-option, -mcpu=cortex-a55+crypto+crc,)
-KBUILD_CFLAGS	+= $(call cc-option, -mtune=exynos-m3,)
+ifeq ($(CONFIG_SOC_EXYNOS9810),y)
+KBUILD_CFLAGS	+= $(call cc-option, -mcpu=cortex-a55+crypto+crc -mtune=exynos-m3+crypto+crc,)
 endif
 
-ifeq ($(CONFIG_CPU_BIG_ENDIAN), y)
+ifeq ($(CONFIG_CPU_BIG_ENDIAN),y)
 KBUILD_CPPFLAGS	+= -mbig-endian
 AS		+= -EB
 LDFLAGS	+= -EB $(call ld-option, -maarch64elfb)
@@ -69,8 +76,12 @@ endif
 
 CHECKFLAGS	+= -D__aarch64__
 
-ifeq ($(CONFIG_ARM64_MODULE_CMODEL_LARGE), y)
+ifeq ($(CONFIG_ARM64_MODULE_CMODEL_LARGE),y)
 KBUILD_CFLAGS_MODULE	+= -mcmodel=large
+ifeq ($(CONFIG_LTO_CLANG),y)
+# Code model is not stored in LLVM IR, so we need to pass it also to LLVMgold
+KBUILD_LDFLAGS_MODULE += -plugin-opt=-code-model=large
+endif
 endif
 
 ifeq ($(CONFIG_ARM64_MODULE_PLTS),y)
@@ -81,7 +92,7 @@ endif
 head-y		:= arch/arm64/kernel/head.o
 
 # The byte offset of the kernel image in RAM from the start of RAM.
-ifeq ($(CONFIG_ARM64_RANDOMIZE_TEXT_OFFSET), y)
+ifeq ($(CONFIG_ARM64_RANDOMIZE_TEXT_OFFSET),y)
 TEXT_OFFSET := $(shell awk "BEGIN {srand(); printf \"0x%06x\n\", \
 		 int(2 * 1024 * 1024 / (2 ^ $(CONFIG_ARM64_PAGE_SHIFT)) * \
 		 rand()) * (2 ^ $(CONFIG_ARM64_PAGE_SHIFT))}")

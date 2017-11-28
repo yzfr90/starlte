@@ -36,6 +36,7 @@
 *.ll
 modules.builtin
 Module.symvers
+*.symversions
 *.dwo
 *.su
 *.c.[012]*.*
@@ -118,11 +119,11 @@ all.config
 
 # Build log
 build.log
-last_kmsg
+last_kmsg*
 logcat
 
 # Kernel flashable zip
-g960f_kernel.zip
+g960f_kernel*.zip
 
 # should keep .gitkeep
 !.gitkeep

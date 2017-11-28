@@ -71,7 +71,7 @@ class IntegrityRoutine(ELF):
         """
         addrs_for_hmac = list()
         for section_name, sym_names in sec_sym_sequence.items():
-            if relocs_gaps is not None and section_name == ".rodata":
+            if section_name == ".rodata":
                 for symbol in self.get_symbol_by_name(sym_names):
                     if symbol is not None:
                         addrs_for_hmac.append(symbol.addr)
@@ -79,7 +79,8 @@ class IntegrityRoutine(ELF):
                 for symbol in self.get_symbol_by_name(sym_names):
                     if symbol is not None:
                         addrs_for_hmac.append(symbol.addr)
-        addrs_for_hmac.extend(self.utils.flatten(relocs_gaps))
+        if relocs_gaps is not None:
+            addrs_for_hmac.extend(self.utils.flatten(relocs_gaps))
         addrs_for_hmac.sort()
         return [[item1, item2] for item1, item2 in self.utils.pairwise(addrs_for_hmac)]
 
@@ -284,7 +285,9 @@ class IntegrityRoutine(ELF):
         rel_addr_start = self.get_symbol_by_name("first_" + module_name + "_rodata")
         rel_addr_end = self.get_symbol_by_name("last_" + module_name + "_rodata")
 
-        reloc_gaps = self.get_reloc_gaps(rel_addr_start.addr, rel_addr_end.addr)
+        reloc_gaps = None
+        if rel_addr_start is not None and rel_addr_end is not None:
+            reloc_gaps = self.get_reloc_gaps(rel_addr_start.addr, rel_addr_end.addr)
         addrs_for_hmac = self.get_addrs_for_hmac(sec_sym, reloc_gaps)
 
         digest = self.get_hmac(addrs_for_hmac, "The quick brown fox jumps over the lazy dog")

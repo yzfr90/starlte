@@ -14,6 +14,7 @@ obj-vdso := $(addprefix $(obj)/, $(obj-vdso))
 ccflags-y := -shared -fno-common -fno-builtin
 ccflags-y += -nostdlib -Wl,-soname=linux-vdso.so.1 \
 		$(call cc-ldoption, -Wl$(comma)--hash-style=sysv)
+ccflags-y += $(DISABLE_LTO)
 
 # Disable gcov profiling for VDSO code
 GCOV_PROFILE := n
@@ -54,7 +55,7 @@ $(obj-vdso): %.o: %.S FORCE
 
 # Actual build commands
 quiet_cmd_vdsold = VDSOL   $@
-      cmd_vdsold = $(CC) $(c_flags) -Wl,-n -Wl,-T $^ -o $@
+      cmd_vdsold = $(CC) $(c_flags) $(call cc-ldoption, -Wl$(comma)-n) -Wl,-T $^ -o $@
 quiet_cmd_vdsoas = VDSOA   $@
       cmd_vdsoas = $(CC) $(a_flags) -c -o $@ $<
 

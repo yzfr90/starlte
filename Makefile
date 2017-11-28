@@ -350,6 +350,7 @@ include scripts/Kbuild.include
 # Make variables (CC, etc...)
 AS		= $(CROSS_COMPILE)as
 LD		= $(CROSS_COMPILE)ld
+LDGOLD	= $(CROSS_COMPILE)ld.gold
 CC		= $(CROSS_COMPILE)gcc
 CPP		= $(CC) -E
 AR		= $(CROSS_COMPILE)ar
@@ -408,6 +409,7 @@ KBUILD_AFLAGS_MODULE  := -DMODULE
 KBUILD_CFLAGS_MODULE  := -DMODULE
 KBUILD_LDFLAGS_MODULE := -T $(srctree)/scripts/module-common.lds
 GCC_PLUGINS_CFLAGS :=
+LDFLAGS :=
 
 # Read KERNELRELEASE from include/config/kernel.release (if it exists)
 KERNELRELEASE = $(shell cat include/config/kernel.release 2> /dev/null)
@@ -516,13 +518,13 @@ endif
 
 ifeq ($(cc-name),clang)
 ifneq ($(CROSS_COMPILE),)
-CLANG_TARGET	:= -target $(notdir $(CROSS_COMPILE:%-=%))
-GCC_TOOLCHAIN_DIR := $(dir $(CROSS_COMPILE:%-=%))
+CLANG_TARGET	:= --target=$(notdir $(CROSS_COMPILE:%-=%))
+GCC_TOOLCHAIN_DIR := $(dir $(shell which $(LD)))
 CLANG_PREFIX	:= --prefix=$(GCC_TOOLCHAIN_DIR)
 GCC_TOOLCHAIN	:= $(realpath $(GCC_TOOLCHAIN_DIR)/..)
 endif
 ifneq ($(GCC_TOOLCHAIN),)
-CLANG_GCC_TC	:= -gcc-toolchain $(GCC_TOOLCHAIN)
+CLANG_GCC_TC	:= --gcc-toolchain=$(GCC_TOOLCHAIN)
 endif
 KBUILD_CFLAGS += $(CLANG_TARGET) $(CLANG_GCC_TC) $(CLANG_PREFIX)
 KBUILD_AFLAGS += $(CLANG_TARGET) $(CLANG_GCC_TC) $(CLANG_PREFIX)
@@ -669,6 +671,22 @@ CFLAGS_GCOV	:= -fprofile-arcs -ftest-coverage -fno-tree-loop-im $(call cc-disabl
 CFLAGS_KCOV	:= $(call cc-option,-fsanitize-coverage=trace-pc,)
 export CFLAGS_GCOV CFLAGS_KCOV
 
+# Make toolchain changes before including arch/$(SRCARCH)/Makefile to ensure
+# ar/cc/ld-* macros return correct values.
+ifdef CONFIG_LTO_CLANG
+# use GNU gold with LLVMgold for LTO linking, and LD for vmlinux_link
+LDFINAL_vmlinux := $(LD)
+LD := $(LDGOLD)
+CLANG_BIN_DIR := $(dir $(CC))
+LDFLAGS += -plugin $(CLANG_BIN_DIR)/../lib64/LLVMgold.so
+export LDFLAGS
+# use llvm-ar for building symbol tables from IR files, and llvm-dis instead
+# of objdump for processing symbol versions and exports
+LLVM_AR		:= $(CLANG_BIN_DIR)llvm-ar
+LLVM_DIS	:= $(CLANG_BIN_DIR)llvm-dis
+export LLVM_AR LLVM_DIS
+endif
+
 # The arch Makefile can set ARCH_{CPP,A,C}FLAGS to override the default
 # values of the respective KBUILD_* variables
 ARCH_CPPFLAGS :=
@@ -688,15 +706,34 @@ KBUILD_CFLAGS	+= $(call cc-option,-ffunction-sections,)
 KBUILD_CFLAGS	+= $(call cc-option,-fdata-sections,)
 endif
 
+ifdef CONFIG_LTO_CLANG
+lto-clang-cflags := -flto=thin -fvisibility=hidden
+
+# allow disabling only clang LTO where needed
+DISABLE_LTO_CLANG := -fno-lto -fvisibility=default
+export DISABLE_LTO_CLANG
+endif
+
+ifdef CONFIG_LTO
+lto-cflags := $(lto-clang-cflags)
+KBUILD_CFLAGS += $(lto-cflags)
+
+DISABLE_LTO	:= $(DISABLE_LTO_CLANG)
+export DISABLE_LTO
+
+# LDFINAL_vmlinux and LDFLAGS_FINAL_vmlinux can be set to override
+# the linker and flags for vmlinux_link.
+export LDFINAL_vmlinux LDFLAGS_FINAL_vmlinux
+endif
+
 ifdef CONFIG_CC_OPTIMIZE_FOR_SIZE
 KBUILD_CFLAGS	+= $(call cc-option,-Oz,-Os)
 KBUILD_CFLAGS	+= $(call cc-disable-warning,maybe-uninitialized,)
 else
 ifdef CONFIG_PROFILE_ALL_BRANCHES
-KBUILD_CFLAGS	+= -O2 $(call cc-disable-warning,maybe-uninitialized,)
-else
-KBUILD_CFLAGS   += -O2
+KBUILD_CFLAGS	+= $(call cc-disable-warning,maybe-uninitialized,)
 endif
+KBUILD_CFLAGS   += -O2
 endif
 
 KBUILD_CFLAGS += $(call cc-ifversion, -lt, 0409, \
@@ -1122,6 +1159,22 @@ prepare-objtool: $(objtool_target)
 # CC_STACKPROTECTOR_STRONG! Why did it build with _REGULAR?!")
 PHONY += prepare-compiler-check
 prepare-compiler-check: FORCE
+# Make sure we're using a supported toolchain with LTO_CLANG
+ifdef CONFIG_LTO_CLANG
+  ifneq ($(call clang-ifversion, -ge, 0500, y), y)
+	@echo Cannot use CONFIG_LTO_CLANG: requires clang 5.0 or later >&2 && exit 1
+  endif
+  ifneq ($(call gold-ifversion, -ge, 112000000, y), y)
+	@echo Cannot use CONFIG_LTO_CLANG: requires GNU gold 1.12 or later >&2 && exit 1
+  endif
+endif
+# Make sure compiler supports LTO flags
+ifdef lto-cflags
+  ifeq ($(call cc-option, $(lto-cflags)),)
+	@echo Cannot use CONFIG_LTO: $(lto-cflags) not supported by compiler \
+		>&2 && exit 1
+  endif
+endif
 # Make sure compiler supports requested stack protector flag.
 ifdef stackp-name
   ifeq ($(call cc-option, $(stackp-flag)),)
@@ -1608,7 +1661,8 @@ clean: $(clean-dirs)
 		-o -name modules.builtin -o -name '.tmp_*.o.*' \
 		-o -name '*.c.[012]*.*' \
 		-o -name '*.ll' \
-		-o -name '*.gcno' \) -type f -print | xargs rm -f
+		-o -name '*.gcno' \
+		-o -name '*.*.symversions' \) -type f -print | xargs rm -f
 
 # Generate tags for editors
 # ---------------------------------------------------------------------------

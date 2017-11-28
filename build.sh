@@ -5,14 +5,13 @@ ARCH=arm64
 export KBUILD_BUILD_USER=BuildUser
 export KBUILD_BUILD_HOST=BuildHost
 # export KBUILD_BUILD_TIMESTAMP="Mon Nov 23 00:45:00 +07 1987"
-export KBUILD_COMPILER_STRING="LLVM Clang 7.0"
-CCACHE=ccache
-BUILD_CROSS_COMPILE=$HOME/opt/gcc-arm-8.2-2018.11-x86_64-aarch64-linux-gnu/bin/aarch64-linux-gnu-
-BUILD_CC=$HOME/opt/clang+llvm-7.0.0-x86_64-linux-gnu-ubuntu-16.04/bin/clang
+export KBUILD_COMPILER_STRING="Google Clang 8.0"
+BUILD_CROSS_COMPILE=$HOME/opt/gcc-linaro-7.4.1-2019.02-x86_64_aarch64-linux-gnu/bin/aarch64-linux-gnu-
+BUILD_CC=$HOME/Git/clang-linux-x86/clang-r346389b/bin/clang
 # BUILD_CC="${BUILD_CROSS_COMPILE}gcc"
-BUILD_LD=$HOME/opt/clang+llvm-7.0.0-x86_64-linux-gnu-ubuntu-16.04/bin/ld.lld
-# BUILD_LD="${BUILD_CROSS_COMPILE}ld"
 BUILD_JOB_NUMBER="$(nproc)"
+# BUILD_JOB_NUMBER=1
+OUTPUT_ZIP="g960f_kernel"
 
 RDIR="$(pwd)"
 
@@ -50,13 +49,25 @@ FUNC_BUILD_KERNEL()
 
 	make -j$BUILD_JOB_NUMBER ARCH=${ARCH} \
 			CC=$BUILD_CC \
-			LD=$BUILD_LD \
 			CROSS_COMPILE="$BUILD_CROSS_COMPILE" \
 			$KERNEL_DEFCONFIG || exit -1
 
+	for var in "$@"
+	do
+		if [[ "$var" = "--with-lto" ]] ; then
+			echo ""
+			echo "Enable LTO_CLANG"
+			echo ""
+			./scripts/config \
+			-e LTO_CLANG \
+			-d ARM64_ERRATUM_843419
+			OUTPUT_ZIP=${OUTPUT_ZIP}".lto"
+			break
+		fi
+	done
+
 	make -j$BUILD_JOB_NUMBER ARCH=${ARCH} \
 			CC=$BUILD_CC \
-			LD=$BUILD_LD \
 			CROSS_COMPILE="$BUILD_CROSS_COMPILE" || exit -1
 
 	echo ""
@@ -97,7 +108,7 @@ FUNC_BUILD_ZIP()
 		;;
 	esac
 
-	cd ${RDIR}/out/ && zip ../g960f_kernel.zip -r *
+	cd ${RDIR}/out/ && zip ../${OUTPUT_ZIP}.zip -r *
 }
 
 # MAIN FUNCTION
@@ -105,7 +116,7 @@ rm -rf ./build.log
 (
 	START_TIME=`date +%s`
 
-	FUNC_BUILD_KERNEL
+	FUNC_BUILD_KERNEL "$@"
 	FUNC_BUILD_RAMDISK
 	FUNC_BUILD_ZIP
 
