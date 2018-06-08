@@ -319,10 +319,10 @@
 		fuelgauge,sw_v_empty_voltage = <3200>;
 		fuelgauge,sw_v_empty_voltage_cisd = <3100>;
 		fuelgauge,sw_v_empty_recover_voltage = <3480>;
-		fuelgauge,qrtable20 = <0x0A0C>;
-		fuelgauge,qrtable30 = <0x0889>;
+		fuelgauge,qrtable20 = <0x0D80>;
+		fuelgauge,qrtable30 = <0x0D00>;
 		fuelgauge,fg_resistor = <2>;
-		fuelgauge,capacity = <0x0B1D>;
+		fuelgauge,capacity = <0x0BB8>;
 		/*fuelgauge,auto_discharge_en;*/
 		fuelgauge,discharge_temp_threshold = <600>;
 		fuelgauge,discharge_volt_threshold = <4200>;
