@@ -1,0 +1,81 @@
+#!/sbin/sh
+
+OUTFD=$2
+ZIP=$3
+
+ui_print() {
+  echo -n -e "ui_print $1\n" > /proc/self/fd/$OUTFD
+  echo -n -e "ui_print\n" > /proc/self/fd/$OUTFD
+}
+
+resolve_link() {
+  if [ -z "$1" ] || [ ! -e $1 ]; then
+    return 1
+  fi
+  local VAR=$1
+  while [ -L $VAR ]; do
+    VAR=$(readlink $VAR)
+  done
+  echo $VAR
+}
+
+rm -rf /tmp/starlte
+mkdir -p /tmp/starlte
+cd /tmp/starlte
+unzip -o "$ZIP"
+
+ui_print " ";
+ui_print " - mounting system partition"
+mount /system
+
+ui_print " - mounting vendor partition"
+mount /vendor
+
+ui_print " - flashing kernel"
+BOOT=$(resolve_link $(find /dev/block/platform -type l -iname boot))
+dd if=boot.img of="$BOOT"
+
+ui_print " - removing critical mcRegistry"
+rm -f /vendor/app/mcRegistry/ffffffffd00000000000000000000062.tlbin
+
+ui_print " - removing Rcl and SecurityLogAgent App"
+rm -rf /system/priv-app/Rlc
+rm -rf /system/app/SecurityLogAgent
+
+ui_print " - patching libsecure_storage in order to make Bluetooth work"
+rm -f /vendor/lib/libsecure_storage.so
+rm -f /vendor/lib64/libsecure_storage.so
+cd /tmp/starlte
+mv -f vendor/lib/libsecure_storage.so /vendor/lib/libsecure_storage.so
+mv -f vendor/lib64/libsecure_storage.so /vendor/lib64/libsecure_storage.so
+ui_print " - setting permissions"
+chmod 0644 /vendor/lib/libsecure_storage.so
+chmod 0644 /vendor/lib64/libsecure_storage.so
+
+ui_print " - patching build.prop and default.prop"
+if [ $(grep -c ro.config.tima=0 /system/etc/prop.default) -eq 0 ];
+then
+  sed -i $'/ro.debuggable/a ro.config.tima=0\\\nro.security.vaultkeeper.feature=0\\\nwlan.wfd.hdcp=disable\\\nro.securestorage.support=false' /system/etc/prop.default
+fi
+if [ $(grep -c ro.config.tima=1 /system/build.prop) -eq 1 ];
+then
+  sed -i 's/ro.config.tima=1/ro.config.tima=0/' /system/build.prop
+fi
+if [ $(grep -c ro.security.vaultkeeper.feature=0 /system/etc/build.prop) -eq 0 ];
+then
+  sed -i $'/ro.config.tima=0/a ro.security.vaultkeeper.feature=0\\\nwlan.wfd.hdcp=disable\\\nro.securestorage.support=false' /system/build.prop
+fi
+
+ui_print " - tuning file systems..."
+fstrim -v /system
+fstrim -v /vendor
+
+ui_print " - unmounting partition /vendor"
+umount /vendor
+
+ui_print " - unmounting partition /system"
+umount /system
+
+ui_print " "
+ui_print "finished"
+sync
