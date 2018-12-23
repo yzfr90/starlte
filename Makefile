@@ -401,14 +401,7 @@ KBUILD_CFLAGS   := -Wall -Wundef -Wstrict-prototypes -Wno-trigraphs \
 		   -Werror-implicit-function-declaration \
 		   -Wno-format-security \
 		   -Werror \
-		   -std=gnu89 \
-		   -Wno-switch-unreachable \
-		   -Wno-switch-bool \
-		   -Wno-pointer-compare \
-		   -Wno-bool-compare \
-		   -Wno-bool-operation \
-		   -Wno-duplicate-decl-specifier \
-		   -Wno-misleading-indentation
+		   -std=gnu89
 KBUILD_CPPFLAGS := -D__KERNEL__
 KBUILD_AFLAGS_KERNEL :=
 KBUILD_CFLAGS_KERNEL :=
