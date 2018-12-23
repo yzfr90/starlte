@@ -121,3 +121,6 @@ build.log
 
 # Kernel flashable zip
 g960f_kernel.zip
+
+# should keep .gitkeep
+!.gitkeep
