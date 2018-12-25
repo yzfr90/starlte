@@ -73,10 +73,12 @@ class IntegrityRoutine(ELF):
         for section_name, sym_names in sec_sym_sequence.items():
             if relocs_gaps is not None and section_name == ".rodata":
                 for symbol in self.get_symbol_by_name(sym_names):
-                    addrs_for_hmac.append(symbol.addr)
+                    if symbol is not None:
+                        addrs_for_hmac.append(symbol.addr)
             else:
                 for symbol in self.get_symbol_by_name(sym_names):
-                    addrs_for_hmac.append(symbol.addr)
+                    if symbol is not None:
+                        addrs_for_hmac.append(symbol.addr)
         addrs_for_hmac.extend(self.utils.flatten(relocs_gaps))
         addrs_for_hmac.sort()
         return [[item1, item2] for item1, item2 in self.utils.pairwise(addrs_for_hmac)]

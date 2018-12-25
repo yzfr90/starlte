@@ -1,14 +1,13 @@
 #!/bin/bash
 
-export VARIANT=xx
-export ARCH=arm64
-# export PLATFORM_VERSION=8.0.0
+VARIANT=xx
+ARCH=arm64
 export KBUILD_BUILD_USER=BuildUser
 export KBUILD_BUILD_HOST=BuildHost
-export BUILD_CROSS_COMPILE=$HOME/opt/gcc-linaro-7.3.1-2018.05-x86_64_aarch64-linux-gnu/bin/aarch64-linux-gnu-
-export BUILD_CLANG=$HOME/Git/clang-linux-x86/clang-r346389b/bin/clang
-export CLANG_TRIPLE=aarch64-linux-gnu-
-export BUILD_JOB_NUMBER=`nproc`
+BUILD_CROSS_COMPILE=$HOME/opt/gcc-linaro-7.3.1-2018.05-x86_64_aarch64-linux-gnu/bin/aarch64-linux-gnu-
+BUILD_CC=$HOME/Git/clang-linux-x86/clang-r346389b/bin/clang
+# BUILD_CC="$BUILD_CROSS_COMPILE"gcc
+BUILD_JOB_NUMBER=`nproc`
 
 RDIR=$(pwd)
 
@@ -45,10 +44,12 @@ FUNC_BUILD_KERNEL()
 	FUNC_CLEAN_DTB
 
 	make -j$BUILD_JOB_NUMBER ARCH=$ARCH \
+			CC=$BUILD_CC \
 			CROSS_COMPILE=$BUILD_CROSS_COMPILE \
 			$KERNEL_DEFCONFIG || exit -1
 
 	make -j$BUILD_JOB_NUMBER ARCH=$ARCH \
+			CC=$BUILD_CC \
 			CROSS_COMPILE=$BUILD_CROSS_COMPILE || exit -1
 
 	echo ""
