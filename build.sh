@@ -66,6 +66,7 @@ FUNC_BUILD_RAMDISK()
 		cp $RDIR/arch/$ARCH/boot/dtb.img $RDIR/aik/split_img/boot.img-dtb
 		find $RDIR -name "*.ko" -not -path "*/aik/ramdisk/*" -exec mv -f {} $RDIR/aik/ramdisk/lib/modules/ \;
 		cd $RDIR/aik
+		./fixperm.sh
 		./repackimg.sh
 		;;
 	*)
