@@ -2,7 +2,7 @@
 
 export VARIANT=xx
 export ARCH=arm64
-export PLATFORM_VERSION=8.0.0
+# export PLATFORM_VERSION=8.0.0
 export KBUILD_BUILD_USER=BuildUser
 export KBUILD_BUILD_HOST=BuildHost
 export BUILD_CROSS_COMPILE=$HOME/opt/gcc-linaro-7.3.1-2018.05-x86_64_aarch64-linux-gnu/bin/aarch64-linux-gnu-
