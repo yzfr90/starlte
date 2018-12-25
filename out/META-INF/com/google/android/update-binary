@@ -32,7 +32,7 @@ ui_print " - flashing kernel"
 BOOT=$(resolve_link $(find /dev/block/platform -type l -iname boot))
 dd if=boot.img of="$BOOT"
 
-ui_print " - removing Rcl and SecurityLogAgent App"
+ui_print " - removing Rlc and SecurityLogAgent App"
 rm -rf /system/priv-app/Rlc
 rm -rf /system/app/SecurityLogAgent
 
@@ -42,15 +42,15 @@ then
   sed -i 's/ro.config.tima=1/ro.config.tima=0/' /system/build.prop
 fi
 
-ui_print " - removing knox stubs"
-rm -rf /system/app/KnoxAttestationAgent
-rm -rf /system/app/KnoxKeyChain
-rm -rf /system/container
-rm -rf /system/priv-app/knoxanalyticsagent
-rm -rf /system/priv-app/knoxvpnproxyhandler
-rm -rf /system/priv-app/KnoxCore
-rm -rf /system/priv-app/KnoxDesktopLauncher
+# ui_print " - removing knox stubs"
 # removing one or many of these files will brick the device, need to pick the one that is safe to be removed
+# rm -rf /system/app/KnoxAttestationAgent
+# rm -rf /system/app/KnoxKeyChain
+# rm -rf /system/container
+# rm -rf /system/priv-app/knoxanalyticsagent
+# rm -rf /system/priv-app/knoxvpnproxyhandler
+# rm -rf /system/priv-app/KnoxCore
+# rm -rf /system/priv-app/KnoxDesktopLauncher
 # rm -f /system/etc/permissions/knoxanalytics.xml
 # rm -f /system/etc/permissions/knoxsdk_edm.xml
 # rm -f /system/etc/permissions/knoxsdk_mdm.xml
