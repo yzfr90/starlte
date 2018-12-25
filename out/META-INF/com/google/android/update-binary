@@ -28,8 +28,8 @@ ui_print " ";
 ui_print " - mounting system partition"
 mount /system
 
-ui_print " - mounting vendor partition"
-mount /vendor
+# ui_print " - mounting vendor partition"
+# mount /vendor
 
 ui_print " - flashing kernel"
 BOOT=$(resolve_link $(find /dev/block/platform -type l -iname boot))
@@ -39,78 +39,81 @@ ui_print " - removing Rcl and SecurityLogAgent App"
 rm -rf /system/priv-app/Rlc
 rm -rf /system/app/SecurityLogAgent
 
-ui_print " - patching libsecure_storage in order to make Bluetooth work"
-rm -f /vendor/lib/libsecure_storage.so
-rm -f /vendor/lib64/libsecure_storage.so
-cd /tmp/starlte
-mv -f vendor/lib/libsecure_storage.so /vendor/lib/libsecure_storage.so
-mv -f vendor/lib64/libsecure_storage.so /vendor/lib64/libsecure_storage.so
-ui_print " - setting permissions"
-chmod 0644 /vendor/lib/libsecure_storage.so
-chmod 0644 /vendor/lib64/libsecure_storage.so
+# ui_print " - patching libsecure_storage in order to make Bluetooth work"
+# rm -f /vendor/lib/libsecure_storage.so
+# rm -f /vendor/lib64/libsecure_storage.so
+# cd /tmp/starlte
+# mv -f vendor/lib/libsecure_storage.so /vendor/lib/libsecure_storage.so
+# mv -f vendor/lib64/libsecure_storage.so /vendor/lib64/libsecure_storage.so
+# ui_print " - setting permissions"
+# chmod 0644 /vendor/lib/libsecure_storage.so
+# chmod 0644 /vendor/lib64/libsecure_storage.so
 
-ui_print " - patching build.prop and default.prop"
-if [ $(grep -c ro.config.tima=0 /system/etc/prop.default) -eq 0 ];
-then
-  sed -i $'/ro.debuggable/a ro.config.tima=0\\\nro.security.vaultkeeper.feature=0\\\nwlan.wfd.hdcp=disable\\\nro.securestorage.support=false' /system/etc/prop.default
-fi
+ui_print " - patching build.prop"
 if [ $(grep -c ro.config.tima=1 /system/build.prop) -eq 1 ];
 then
   sed -i 's/ro.config.tima=1/ro.config.tima=0/' /system/build.prop
 fi
-if [ $(grep -c ro.security.vaultkeeper.feature=0 /system/etc/build.prop) -eq 0 ];
-then
-  sed -i $'/ro.config.tima=0/a ro.security.vaultkeeper.feature=0\\\nwlan.wfd.hdcp=disable\\\nro.securestorage.support=false' /system/build.prop
-fi
+# if [ $(grep -c ro.security.vaultkeeper.feature=0 /system/etc/build.prop) -eq 0 ];
+# then
+#   sed -i $'/ro.config.tima=0/a ro.security.vaultkeeper.feature=0\\\nwlan.wfd.hdcp=disable\\\nro.securestorage.support=false' /system/build.prop
+# fi
 
-ui_print " - removing knox stub"
+# ui_print " - patching default.prop"
+# if [ $(grep -c ro.config.tima=0 /system/etc/prop.default) -eq 0 ];
+# then
+#   sed -i $'/ro.debuggable/a ro.config.tima=0\\\nro.security.vaultkeeper.feature=0\\\nwlan.wfd.hdcp=disable\\\nro.securestorage.support=false' /system/etc/prop.default
+# fi
+
+ui_print " - removing knox stubs"
 rm -rf /system/app/KnoxAttestationAgent
 rm -rf /system/app/KnoxKeyChain
 rm -rf /system/container
-rm -f /system/etc/permissions/knoxanalytics.xml
-rm -f /system/etc/permissions/knoxsdk_edm.xml
-rm -f /system/etc/permissions/knoxsdk_mdm.xml
-rm -f /system/etc/permissions/privapp-permissions-com.knox.vpn.proxyhandler.xml
-rm -f /system/etc/permissions/privapp-permissions-com.samsung.android.knox.analytics.uploader.xml
-rm -f /system/etc/permissions/privapp-permissions-com.samsung.android.knox.containeragent.xml
-rm -f /system/etc/permissions/privapp-permissions-com.samsung.android.knox.containercore.xml
-rm -f /system/etc/permissions/privapp-permissions-com.samsung.knox.securefolder.xml
-rm -f /system/framework/arm/boot-knoxanalyticssdk.art
-rm -f /system/framework/arm/boot-knoxanalyticssdk.oat
-rm -f /system/framework/arm/boot-knoxanalyticssdk.vdex
-rm -f /system/framework/arm/boot-knoxsdk.art
-rm -f /system/framework/arm/boot-knoxsdk.oat
-rm -f /system/framework/arm/boot-knoxsdk.vdex
-rm -f /system/framework/arm/boot-knoxvpnuidtag.art
-rm -f /system/framework/arm/boot-knoxvpnuidtag.oat
-rm -f /system/framework/arm/boot-knoxvpnuidtag.vdex
-rm -f /system/framework/arm64/boot-knoxanalyticssdk.art
-rm -f /system/framework/arm64/boot-knoxanalyticssdk.oat
-rm -f /system/framework/arm64/boot-knoxanalyticssdk.vdex
-rm -f /system/framework/arm64/boot-knoxsdk.art
-rm -f /system/framework/arm64/boot-knoxsdk.oat
-rm -f /system/framework/arm64/boot-knoxsdk.vdex
-rm -f /system/framework/arm64/boot-knoxvpnuidtag.art
-rm -f /system/framework/arm64/boot-knoxvpnuidtag.oat
-rm -f /system/framework/arm64/boot-knoxvpnuidtag.vdex
-rm -f /system/framework/knoxanalyticssdk.jar
-rm -f /system/framework/knoxsdk.jar
-rm -f /system/framework/knoxvpnuidtag.jar
-rm -f /system/lib/libknox_encryption.so
-rm -f /system/lib/libknox_filemanager.so
-rm -f /system/lib/libknox_keyutils.so
-rm -f /system/lib/libknox_km.so
-rm -f /system/lib/libknoxvpnfdsender.so
-rm -f /system/lib64/libjni_knoxvpnproxyhandler.so
-rm -f /system/lib64/libknox_encryption.so
-rm -f /system/lib64/libknox_filemanager.so
-rm -f /system/lib64/libknox_keyutils.so
-rm -f /system/lib64/libknox_km.so
-rm -f /system/lib64/libknoxvpnfdsender.so
 rm -rf /system/priv-app/knoxanalyticsagent
 rm -rf /system/priv-app/knoxvpnproxyhandler
 rm -rf /system/priv-app/KnoxCore
 rm -rf /system/priv-app/KnoxDesktopLauncher
+# removing one or many of these files will brick the device, need to pick the one that is safe to be removed
+# rm -f /system/etc/permissions/knoxanalytics.xml
+# rm -f /system/etc/permissions/knoxsdk_edm.xml
+# rm -f /system/etc/permissions/knoxsdk_mdm.xml
+# rm -f /system/etc/permissions/privapp-permissions-com.knox.vpn.proxyhandler.xml
+# rm -f /system/etc/permissions/privapp-permissions-com.samsung.android.knox.analytics.uploader.xml
+# rm -f /system/etc/permissions/privapp-permissions-com.samsung.android.knox.containeragent.xml
+# rm -f /system/etc/permissions/privapp-permissions-com.samsung.android.knox.containercore.xml
+# rm -f /system/etc/permissions/privapp-permissions-com.samsung.knox.securefolder.xml
+# rm -f /system/framework/arm/boot-knoxanalyticssdk.art
+# rm -f /system/framework/arm/boot-knoxanalyticssdk.oat
+# rm -f /system/framework/arm/boot-knoxanalyticssdk.vdex
+# rm -f /system/framework/arm/boot-knoxsdk.art
+# rm -f /system/framework/arm/boot-knoxsdk.oat
+# rm -f /system/framework/arm/boot-knoxsdk.vdex
+# rm -f /system/framework/arm/boot-knoxvpnuidtag.art
+# rm -f /system/framework/arm/boot-knoxvpnuidtag.oat
+# rm -f /system/framework/arm/boot-knoxvpnuidtag.vdex
+# rm -f /system/framework/arm64/boot-knoxanalyticssdk.art
+# rm -f /system/framework/arm64/boot-knoxanalyticssdk.oat
+# rm -f /system/framework/arm64/boot-knoxanalyticssdk.vdex
+# rm -f /system/framework/arm64/boot-knoxsdk.art
+# rm -f /system/framework/arm64/boot-knoxsdk.oat
+# rm -f /system/framework/arm64/boot-knoxsdk.vdex
+# rm -f /system/framework/arm64/boot-knoxvpnuidtag.art
+# rm -f /system/framework/arm64/boot-knoxvpnuidtag.oat
+# rm -f /system/framework/arm64/boot-knoxvpnuidtag.vdex
+# rm -f /system/framework/knoxanalyticssdk.jar
+# rm -f /system/framework/knoxsdk.jar
+# rm -f /system/framework/knoxvpnuidtag.jar
+# rm -f /system/lib/libknox_encryption.so
+# rm -f /system/lib/libknox_filemanager.so
+# rm -f /system/lib/libknox_keyutils.so
+# rm -f /system/lib/libknox_km.so
+# rm -f /system/lib/libknoxvpnfdsender.so
+# rm -f /system/lib64/libjni_knoxvpnproxyhandler.so
+# rm -f /system/lib64/libknox_encryption.so
+# rm -f /system/lib64/libknox_filemanager.so
+# rm -f /system/lib64/libknox_keyutils.so
+# rm -f /system/lib64/libknox_km.so
+# rm -f /system/lib64/libknoxvpnfdsender.so
 
 ui_print " - removing bloatware"
 rm -rf /system/app/AutomationTest_FB
@@ -153,4 +156,3 @@ umount /system
 
 ui_print " "
 ui_print "finished"
-sync
