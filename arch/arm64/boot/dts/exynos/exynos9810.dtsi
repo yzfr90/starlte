@@ -5048,6 +5048,7 @@
 			dm-type = <DM_CPU_CL0>;
 
 			min-freq = <455000>;
+			max-freq = <1950000>;
 
 			/* PM QoS Class ID*/
 			pm_qos-min-class = <3>;
@@ -5092,14 +5093,13 @@
 			dm-type = <DM_CPU_CL1>;
 
 			min-freq = <650000>;
-			max-freq = <1794000>;
-			policy-max = <1794000>;
+			max-freq = <2314000>;
 
 			/* PM QoS Class ID*/
 			pm_qos-min-class = <5>;
 			pm_qos-max-class = <6>;
 
-			pm_qos-booting = <1794000>;
+			pm_qos-booting = <2314000>;
 
 			#cooling-cells = <2>; /* min followed by max */
 
@@ -5113,7 +5113,7 @@
 						  2704000 1794000
 						  2652000 1794000
 						  2496000 1794000
-						  2314000 1794000
+						  2314000 1539000
 						  2158000 1539000
 						  2002000 1539000
 						  1924000 1539000
