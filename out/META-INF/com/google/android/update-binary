@@ -42,15 +42,15 @@ then
   sed -i 's/ro.config.tima=1/ro.config.tima=0/' /system/build.prop
 fi
 
-# ui_print " - removing knox stubs"
+ui_print " - removing knox stubs"
+rm -rf /system/app/KnoxAttestationAgent
+rm -rf /system/app/KnoxKeyChain
+rm -rf /system/container
+rm -rf /system/priv-app/knoxanalyticsagent
+rm -rf /system/priv-app/knoxvpnproxyhandler
+rm -rf /system/priv-app/KnoxCore
+rm -rf /system/priv-app/KnoxDesktopLauncher
 # removing one or many of these files will brick the device, need to pick the one that is safe to be removed
-# rm -rf /system/app/KnoxAttestationAgent
-# rm -rf /system/app/KnoxKeyChain
-# rm -rf /system/container
-# rm -rf /system/priv-app/knoxanalyticsagent
-# rm -rf /system/priv-app/knoxvpnproxyhandler
-# rm -rf /system/priv-app/KnoxCore
-# rm -rf /system/priv-app/KnoxDesktopLauncher
 # rm -f /system/etc/permissions/knoxanalytics.xml
 # rm -f /system/etc/permissions/knoxsdk_edm.xml
 # rm -f /system/etc/permissions/knoxsdk_mdm.xml
@@ -116,6 +116,8 @@ rm -rf /system/priv-app/OneDrive_Samsung_v3
 rm -rf /system/priv-app/PowerPoint_SamsungStub
 rm -rf /system/priv-app/serviceModeApp_FB
 rm -rf /system/priv-app/SecureFolder
+rm -rf /system/priv-app/SamsungPass
+rm -rf /system/priv-app/SamsungPassAutofill_v1
 rm -rf /system/priv-app/SmartManager_v6_DeviceSecurity
 rm -rf /system/priv-app/SystemUIBixby
 rm -rf /system/priv-app/Upday
