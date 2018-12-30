@@ -119,6 +119,7 @@ all.config
 # Build log
 build.log
 last_kmsg
+logcat
 
 # Kernel flashable zip
 g960f_kernel.zip
