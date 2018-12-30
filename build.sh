@@ -5,10 +5,10 @@ ARCH=arm64
 export KBUILD_BUILD_USER=BuildUser
 export KBUILD_BUILD_HOST=BuildHost
 export KBUILD_BUILD_TIMESTAMP="Mon Nov 23 00:45:00 +07 1987"
-export KBUILD_COMPILER_STRING="Android clang version 8.0.6 (based on LLVM 8.0.6svn)"
+export KBUILD_COMPILER_STRING="LLVM Clang 7.0"
 CCACHE=ccache
 BUILD_CROSS_COMPILE=$HOME/opt/gcc-linaro-7.3.1-2018.05-x86_64_aarch64-linux-gnu/bin/aarch64-linux-gnu-
-BUILD_CC=$HOME/Git/clang-linux-x86/clang-r346389b/bin/clang
+BUILD_CC=$HOME/opt/clang+llvm-7.0.0-x86_64-linux-gnu-ubuntu-16.04/bin/clang
 # BUILD_CC="${BUILD_CROSS_COMPILE}gcc"
 BUILD_JOB_NUMBER="$(nproc)"
 
