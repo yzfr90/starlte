@@ -5099,7 +5099,7 @@
 			pm_qos-min-class = <5>;
 			pm_qos-max-class = <6>;
 
-			pm_qos-booting = <2314000>;
+			pm_qos-booting = <1794000>;
 
 			#cooling-cells = <2>; /* min followed by max */
 
