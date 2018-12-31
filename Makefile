@@ -257,7 +257,7 @@ SUBARCH := $(shell uname -m | sed -e s/i.86/x86/ -e s/x86_64/x86/ \
 #ARCH			?= $(SUBARCH)
 ARCH			?= arm64
 #CROSS_COMPILE	?= $(CONFIG_CROSS_COMPILE:"%"=%)
-CROSS_COMPILE   ?= $(HOME)/opt/gcc-linaro-7.3.1-2018.05-x86_64_aarch64-linux-gnu/bin/aarch64-linux-gnu-
+CROSS_COMPILE   ?= $(HOME)/opt/gcc-arm-8.2-2018.11-x86_64-aarch64-linux-gnu/bin/aarch64-linux-gnu-
 
 # Architecture as present in compile.h
 UTS_MACHINE 	:= $(ARCH)
