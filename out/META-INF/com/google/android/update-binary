@@ -50,6 +50,7 @@ rm -rf /system/priv-app/knoxanalyticsagent
 rm -rf /system/priv-app/knoxvpnproxyhandler
 rm -rf /system/priv-app/KnoxCore
 rm -rf /system/priv-app/KnoxDesktopLauncher
+rm -rf /system/priv-app/ContainerAgent3
 # removing one or many of these files will brick the device, need to pick the one that is safe to be removed
 # rm -f /system/etc/permissions/knoxanalytics.xml
 # rm -f /system/etc/permissions/knoxsdk_edm.xml
@@ -101,6 +102,9 @@ rm -rf /system/app/FactoryCameraFB
 rm -rf /system/app/FBAppManager_NS
 rm -rf /system/app/FlipboardBriefing
 rm -rf /system/app/VisionIntelligence2
+rm -rf /system/app/SecureFolderSetupPage
+rm -rf /system/app/UniversalMDMClient
+rm -rf /system/app/SamsungPassAutofill_v1
 rm -rf /system/priv-app/Bixby
 rm -rf /system/priv-app/BixbyAgentStub
 rm -rf /system/priv-app/BixbyGlobalAction
@@ -117,7 +121,6 @@ rm -rf /system/priv-app/PowerPoint_SamsungStub
 rm -rf /system/priv-app/serviceModeApp_FB
 rm -rf /system/priv-app/SecureFolder
 rm -rf /system/priv-app/SamsungPass
-rm -rf /system/priv-app/SamsungPassAutofill_v1
 rm -rf /system/priv-app/SmartManager_v6_DeviceSecurity
 rm -rf /system/priv-app/SystemUIBixby
 rm -rf /system/priv-app/Upday
