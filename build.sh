@@ -10,6 +10,8 @@ CCACHE=ccache
 BUILD_CROSS_COMPILE=$HOME/opt/gcc-arm-8.2-2018.11-x86_64-aarch64-linux-gnu/bin/aarch64-linux-gnu-
 BUILD_CC=$HOME/opt/clang+llvm-7.0.0-x86_64-linux-gnu-ubuntu-16.04/bin/clang
 # BUILD_CC="${BUILD_CROSS_COMPILE}gcc"
+BUILD_LD=$HOME/opt/clang+llvm-7.0.0-x86_64-linux-gnu-ubuntu-16.04/bin/ld.lld
+# BUILD_LD="${BUILD_CROSS_COMPILE}ld"
 BUILD_JOB_NUMBER="$(nproc)"
 
 RDIR="$(pwd)"
@@ -48,11 +50,13 @@ FUNC_BUILD_KERNEL()
 
 	make -j$BUILD_JOB_NUMBER ARCH=${ARCH} \
 			CC="${CCACHE} ${BUILD_CC}" \
+			LD=$BUILD_LD \
 			CROSS_COMPILE="$BUILD_CROSS_COMPILE" \
 			$KERNEL_DEFCONFIG || exit -1
 
 	make -j$BUILD_JOB_NUMBER ARCH=${ARCH} \
 			CC="${CCACHE} ${BUILD_CC}" \
+			LD=$BUILD_LD \
 			CROSS_COMPILE="$BUILD_CROSS_COMPILE" || exit -1
 
 	echo ""

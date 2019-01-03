@@ -105,8 +105,10 @@ extern void init_IRQ(void);
 extern void fork_init(void);
 extern void radix_tree_init(void);
 
+#ifdef CONFIG_UH_RKP
 int rkp_support_large_memory;
 EXPORT_SYMBOL(rkp_support_large_memory);
+#endif
 
 #ifdef CONFIG_UH_RKP
 extern struct vm_struct *vmlist;
@@ -582,7 +584,9 @@ static void __init rkp_init(void)
 	//init.physmap_addr
 	init._srodata = (u64)__start_rodata;
 	init._erodata = (u64)__end_rodata;
+#ifdef CONFIG_UH_RKP
 	init.large_memory = rkp_support_large_memory;
+#endif
 
 	uh_call(UH_APP_RKP, RKP_START, (u64)&init, (u64)kimage_voffset, 0, 0);
 	rkp_started = 1;

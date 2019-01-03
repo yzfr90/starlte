@@ -10,6 +10,7 @@
 #
 # Copyright (C) 1995-2001 by Russell King
 
+LDFLAGS :=
 LDFLAGS_vmlinux	:=--no-undefined -X
 CPPFLAGS_vmlinux.lds = -DTEXT_OFFSET=$(TEXT_OFFSET)
 GZFLAGS		:=-9
@@ -18,12 +19,17 @@ ifeq ($(CONFIG_RELOCATABLE), y)
 # Pass --no-apply-dynamic-relocs to restore pre-binutils-2.27 behaviour
 # for relative relocs, since this leads to better Image compression
 # with the relocation offsets always being zero.
-LDFLAGS_vmlinux		+= -pie -shared -Bsymbolic \
+LDFLAGS_vmlinux		+= -shared -Bsymbolic \
+			$(call ld-option, -z notext) 
+			$(call ld-option, -z norelro) \
 			$(call ld-option, --no-apply-dynamic-relocs)
 endif
 
 ifneq ($(CONFIG_RELOCATABLE_KERNEL),)
-LDFLAGS_vmlinux		+= -pie -Bsymbolic
+LDFLAGS_vmlinux		+= -shared -Bsymbolic \
+			$(call ld-option, -z notext) \
+			$(call ld-option, -z norelro) \
+			$(call ld-option, --no-apply-dynamic-relocs)
 endif
 
 ifeq ($(CONFIG_ARM64_ERRATUM_843419),y)
@@ -59,12 +65,12 @@ endif
 ifeq ($(CONFIG_CPU_BIG_ENDIAN), y)
 KBUILD_CPPFLAGS	+= -mbig-endian
 AS		+= -EB
-LD		+= -EB
+LDFLAGS	+= -EB $(call ld-option, -maarch64elfb)
 UTS_MACHINE	:= aarch64_be
 else
 KBUILD_CPPFLAGS	+= -mlittle-endian
 AS		+= -EL
-LD		+= -EL
+LDFLAGS	+= -EL $(call ld-option, -maarch64elf)
 UTS_MACHINE	:= aarch64
 endif
 
