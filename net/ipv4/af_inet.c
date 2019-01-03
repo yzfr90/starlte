@@ -130,12 +130,14 @@
 #ifdef CONFIG_ANDROID_PARANOID_NETWORK
 #include <linux/android_aid.h>
 
+#ifdef CONFIG_KNOX_NCM
 /* START_OF_KNOX_NPA */
 #include <net/ncm.h>
 #include <linux/kfifo.h>
 #include <asm/current.h>
 #include <linux/pid.h>
 /* END_OF_KNOX_NPA */
+#endif
 
 static inline int current_has_network(void)
 {
