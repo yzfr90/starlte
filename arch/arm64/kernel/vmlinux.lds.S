@@ -220,7 +220,7 @@ SECTIONS
 		KEEP(*(.altinstr_replacement))
 	}
 	. = ALIGN(0x1000);
-#if defined(CONFIG_RELOCATABLE) || defined(CONFIG_RELOCATABLE_KERNEL)
+#ifdef CONFIG_RELOCATABLE
 	.rela.dyn : {
 		__reloc_start = .;
 		*(.rela .rela*)
@@ -295,7 +295,7 @@ SECTIONS
 	HEAD_SYMBOLS
 }
 
-#if defined(CONFIG_RELOCATABLE) || defined(CONFIG_RELOCATABLE_KERNEL)
+#ifdef CONFIG_RELOCATABLE
 VERSION {
 	/* mark all symbols as local so they are not listed in .dynsym */
 	{ local: *; };

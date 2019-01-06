@@ -20,16 +20,9 @@ ifeq ($(CONFIG_RELOCATABLE), y)
 # for relative relocs, since this leads to better Image compression
 # with the relocation offsets always being zero.
 LDFLAGS_vmlinux		+= -shared -Bsymbolic \
-			$(call ld-option, -z notext) 
-			$(call ld-option, -z norelro) \
-			$(call ld-option, --no-apply-dynamic-relocs)
-endif
-
-ifneq ($(CONFIG_RELOCATABLE_KERNEL),)
-LDFLAGS_vmlinux		+= -shared -Bsymbolic \
-			$(call ld-option, -z notext) \
-			$(call ld-option, -z norelro) \
-			$(call ld-option, --no-apply-dynamic-relocs)
+            $(call ld-option, -z notext) \
+            $(call ld-option, -z norelro) \
+            $(call ld-option, --no-apply-dynamic-relocs)
 endif
 
 ifeq ($(CONFIG_ARM64_ERRATUM_843419),y)
